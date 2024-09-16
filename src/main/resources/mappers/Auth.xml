@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.postinforg.mapper.AuthMapper">
+	
+	<select id="getUser" resultType="com.postinforg.domain.UserImpl" parameterType="hashmap">
+	/* 
+	AuthMapper.getUser */
+		SELECT 
+			T.CUST_ID custId, T.AGENT_ID agentId
+			, C.CUST_NAME usrename
+			, T.AUTH_TOKEN token, T.AUTH_TOKEN_EXPIRE tokenExpire
+		FROM TB_AGENT T
+			LEFT OUTER JOIN TB_CUST C ON T.CUST_ID = C.CUST_ID
+		WHERE T.AGENT_ID = #{id} 
+			AND T.CONNECT_LINE = 'R'
+	</select>
+	
+	<select id="getAuthDetail" resultType="egovMap" parameterType="hashmap">
+	/* 
+	AuthMapper.getAuthDetail */
+		SELECT 
+			T.CUST_ID, T.AGENT_ID, C.CUST_NAME, C.CUST_DIV
+			, T.AUTH_TOKEN, T.AUTH_TOKEN_EXPIRE
+		FROM TB_AGENT T
+			LEFT OUTER JOIN TB_CUST C ON T.CUST_ID = C.CUST_ID
+		WHERE T.AGENT_ID = #{id} 
+			AND T.AGENT_PW = SHA2(#{pw}, 256) 
+			AND T.CONNECT_LINE = 'R'
+	</select>
+	
+	<select id="getAuthToken" resultType="egovMap" parameterType="hashmap">
+	/* 
+	AuthMapper.getAuthToken */
+		SELECT 
+			T.CUST_ID, T.AGENT_ID, C.CUST_NAME, C.CUST_DIV
+			, T.AUTH_TOKEN, T.AUTH_TOKEN_EXPIRE
+		FROM TB_AGENT T
+			LEFT OUTER JOIN TB_CUST C ON T.CUST_ID = C.CUST_ID
+		WHERE T.AUTH_TOKEN = #{accessToken}
+			AND T.CONNECT_LINE = 'R'
+	</select>
+	
+	<update id="updateToken" parameterType="hashmap">
+	/* 
+	AuthMapper.updateToken */
+		UPDATE TB_AGENT
+		SET
+			AUTH_TOKEN = #{authToken}
+			, AUTH_TOKEN_EXPIRE = #{authTokenExpire}
+		WHERE AGENT_ID = #{agentId} 
+			AND CONNECT_LINE = 'R'
+	</update>
+
+	<update id="authTokenClear" parameterType="hashmap">
+	/* 
+	AuthMapper.authTokenClear */
+		UPDATE TB_AGENT
+		SET
+			AUTH_TOKEN = NULL
+			, AUTH_TOKEN_EXPIRE = NULL
+		WHERE AGENT_ID = #{agentId} 
+			AND CONNECT_LINE = 'R'
+	</update>
+	
+</mapper>
